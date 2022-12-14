@@ -1,128 +1,118 @@
-class GameBoard
+[array]$Global:Board  = @('.','.','.','.','.','.','.','.','.')
+[char ]$Global:Player = 'O'
+[array]$Global:Score  = @(0,0,0)
+
+function saveBoard
 {
-    [array ]$SBoard
-    [array ]$Board
-    [array ]$Score  = @(0,0,0)
-    [string]$Player = ''
-    [string]$Winner = ''
-    [array ]$BestPos = @(0,0,0,0,0,0,0,0,0)
-
-    GameBoard($BB)
-    {
-        $this.SBoard = $BB
-    }
-
-    [void]ClearBoard($BS)
-    {
-        $this.Winner = ''
-        $this.Board  = $BS
-    }
-
-    [void]InitClass()
-    {
-        $this.Board  = $this.SBoard
-        $this.Player = 'X' #('X','O') | Get-Random
-    }
-
-    [void]DrawBoard()
-    {
-        [byte]$count = 0
-        foreach($b in $this.Board)
-        {
-            Write-Host ($b+" ") -NoNewline
-            $count++
-            if($count -eq 3){ Write-Host; $count = 0 }
-        }
-    }
-
-    [void]ReversPlayer()
-    {
-        if($this.Player -eq 'X'){ $this.Player = 'O' }
-        else { $this.Player = 'X' }
-    }
-
-    [bool]CheckMove($Position)
-    {
-        if(($this.Board[$Position]) -eq '.' )
-        {
-            return $true
-        }
-        return $false
-    }
-
-    [void]MakeMove($Position)
-    {
-        $this.Board[$Position] = $this.Player
-    }
-
-    [int]MoveRest()
-    {
-        $tmp = 0
-        foreach($t in $this.Board)
-        {
-            if($t -eq '.') { $tmp ++ }
-        }
-        return $tmp
-    }
-
-    [bool]CheckOver()
-    {
-        if($this.Board[0] -eq 'X' -and $this.Board[1] -eq 'X' -and $this.Board[2] -eq 'X'){ $this.Winner = 'X'; return $true }
-        if($this.Board[3] -eq 'X' -and $this.Board[4] -eq 'X' -and $this.Board[5] -eq 'X'){ $this.Winner = 'X'; return $true }
-        if($this.Board[6] -eq 'X' -and $this.Board[7] -eq 'X' -and $this.Board[8] -eq 'X'){ $this.Winner = 'X'; return $true }
-
-        if($this.Board[0] -eq 'X' -and $this.Board[3] -eq 'X' -and $this.Board[6] -eq 'X'){ $this.Winner = 'X'; return $true }
-        if($this.Board[1] -eq 'X' -and $this.Board[4] -eq 'X' -and $this.Board[7] -eq 'X'){ $this.Winner = 'X'; return $true }
-        if($this.Board[2] -eq 'X' -and $this.Board[5] -eq 'X' -and $this.Board[8] -eq 'X'){ $this.Winner = 'X'; return $true }
-
-        if($this.Board[0] -eq 'X' -and $this.Board[4] -eq 'X' -and $this.Board[8] -eq 'X'){ $this.Winner = 'X'; return $true }
-        if($this.Board[1] -eq 'X' -and $this.Board[4] -eq 'X' -and $this.Board[7] -eq 'X'){ $this.Winner = 'X'; return $true }
-        if($this.Board[2] -eq 'X' -and $this.Board[4] -eq 'X' -and $this.Board[6] -eq 'X'){ $this.Winner = 'X'; return $true }
-
-        if($this.Board[0] -eq 'O' -and $this.Board[1] -eq 'O' -and $this.Board[2] -eq 'O'){ $this.Winner = 'O'; return $true }
-        if($this.Board[3] -eq 'O' -and $this.Board[4] -eq 'O' -and $this.Board[5] -eq 'O'){ $this.Winner = 'O'; return $true }
-        if($this.Board[6] -eq 'O' -and $this.Board[7] -eq 'O' -and $this.Board[8] -eq 'O'){ $this.Winner = 'O'; return $true }
-
-        if($this.Board[0] -eq 'O' -and $this.Board[3] -eq 'O' -and $this.Board[6] -eq 'O'){ $this.Winner = 'O'; return $true }
-        if($this.Board[1] -eq 'O' -and $this.Board[4] -eq 'O' -and $this.Board[7] -eq 'O'){ $this.Winner = 'O'; return $true }
-        if($this.Board[2] -eq 'O' -and $this.Board[5] -eq 'O' -and $this.Board[8] -eq 'O'){ $this.Winner = 'O'; return $true }
-
-        if($this.Board[0] -eq 'O' -and $this.Board[4] -eq 'O' -and $this.Board[8] -eq 'O'){ $this.Winner = 'O'; return $true }
-        if($this.Board[1] -eq 'O' -and $this.Board[4] -eq 'O' -and $this.Board[7] -eq 'O'){ $this.Winner = 'O'; return $true }
-        if($this.Board[2] -eq 'O' -and $this.Board[4] -eq 'O' -and $this.Board[6] -eq 'O'){ $this.Winner = 'O'; return $true }
-
-        return $false
-    }
+    Remove-Item board.txt
+    $Board | Out-File board.txt
 }
 
-[array]$Board1 = @('.','.','.','.','.','.','.','.','.')
-
-$Game = [GameBoard]::new($Board1)
-$Game.InitClass()
-
-for($i=0;$i -lt 100;$i++)
+function restoreBoard
 {
-    while($Game.CheckOver() -ne $true -and $Game.MoveRest() -ne 0)
-    {
-        [byte]$Move = (0..8) | Get-Random
-        if($Game.CheckMove($Move) -ne $false)
-        {
-            $Game.MakeMove($Move)
-            $Game.ReversPlayer()
-        }
-    }
-
-    if($Game.Winner -eq 'X'){ $Game.Score[2] ++ }
-    if($Game.Winner -eq 'O'){ $Game.Score[0] ++ }
-    if($Game.Winner -eq '' ){ $Game.Score[1] ++ }
-
-    $Board1 = @('.','.','.','.','.','.','.','.','.')
-    $Game.ClearBoard($Board1)
+    [array]$FileBoard = Get-Content board.txt
+    $Global:Board = $FileBoard
 }
 
-Write-Host ("O:"+$Game.Score[0])
-Write-Host ("!:"+$Game.Score[1])
-Write-Host ("X:"+$Game.Score[2])
-$Game.Score = @(0,0,0)
+function checkMove
+{
+    param
+    (
+        [parameter(Mandatory=$true)][byte]$Position
+    )
 
-# $Game.DrawBoard()
+    if($Global:Board[$Position] -eq '.'){ return $true }
+    else { return $false }
+}
+
+function makeMove
+{
+    param
+    (
+        [parameter(Mandatory=$true)][byte]$Position
+    )
+
+    $Global:Board[$Position] = $Player
+
+    if($Global:Player -eq 'X') { $Global:Player = 'O' }
+    else { $Global:Player = 'X' }
+}
+
+function drawBoard
+{
+    Write-Host $Global:Board[0]$Global:Board[1]$Global:Board[2]
+    Write-Host $Global:Board[3]$Global:Board[4]$Global:Board[5]
+    Write-Host $Global:Board[6]$Global:Board[7]$Global:Board[8]
+}
+
+function GameOver
+{
+    if($Global:Board[0] -eq 'X' -and $Global:Board[1] -eq 'X' -and $Global:Board[2] -eq 'X'){ return 0 }
+    if($Global:Board[3] -eq 'X' -and $Global:Board[4] -eq 'X' -and $Global:Board[5] -eq 'X'){ return 0 }
+    if($Global:Board[6] -eq 'X' -and $Global:Board[7] -eq 'X' -and $Global:Board[8] -eq 'X'){ return 0 }
+
+    if($Global:Board[0] -eq 'X' -and $Global:Board[3] -eq 'X' -and $Global:Board[6] -eq 'X'){ return 0 }
+    if($Global:Board[1] -eq 'X' -and $Global:Board[4] -eq 'X' -and $Global:Board[7] -eq 'X'){ return 0 }
+    if($Global:Board[2] -eq 'X' -and $Global:Board[5] -eq 'X' -and $Global:Board[8] -eq 'X'){ return 0 }
+
+    if($Global:Board[0] -eq 'X' -and $Global:Board[4] -eq 'X' -and $Global:Board[8] -eq 'X'){ return 0 }
+    if($Global:Board[1] -eq 'X' -and $Global:Board[4] -eq 'X' -and $Global:Board[7] -eq 'X'){ return 0 }
+    if($Global:Board[2] -eq 'X' -and $Global:Board[4] -eq 'X' -and $Global:Board[6] -eq 'X'){ return 0 }
+
+    if($Global:Board[0] -eq 'O' -and $Global:Board[1] -eq 'O' -and $Global:Board[2] -eq 'O'){ return 1 }
+    if($Global:Board[3] -eq 'O' -and $Global:Board[4] -eq 'O' -and $Global:Board[5] -eq 'O'){ return 1 }
+    if($Global:Board[6] -eq 'O' -and $Global:Board[7] -eq 'O' -and $Global:Board[8] -eq 'O'){ return 1 }
+
+    if($Global:Board[0] -eq 'O' -and $Global:Board[3] -eq 'O' -and $Global:Board[6] -eq 'O'){ return 1 }
+    if($Global:Board[1] -eq 'O' -and $Global:Board[4] -eq 'O' -and $Global:Board[7] -eq 'O'){ return 1 }
+    if($Global:Board[2] -eq 'O' -and $Global:Board[5] -eq 'O' -and $Global:Board[8] -eq 'O'){ return 1 }
+
+    if($Global:Board[0] -eq 'O' -and $Global:Board[4] -eq 'O' -and $Global:Board[8] -eq 'O'){ return 1 }
+    if($Global:Board[1] -eq 'O' -and $Global:Board[4] -eq 'O' -and $Global:Board[7] -eq 'O'){ return 1 }
+    if($Global:Board[2] -eq 'O' -and $Global:Board[4] -eq 'O' -and $Global:Board[6] -eq 'O'){ return 1 }
+
+    $tmp = 0
+
+    foreach($t in $Global:Board)
+    {
+        if($t -eq '.') { $tmp ++ }
+    }
+    if($tmp -eq 0){ return 99 }
+
+    return $false
+}
+
+saveBoard
+
+$cc = 30
+while($cc -ne 0)
+{
+    $tmp = (0..8) | Get-Random
+    if((checkMove -Position $tmp) -ne $false )
+    {
+        makeMove -Position $tmp
+        if((GameOver) -eq 0)
+        {
+            drawBoard
+            restoreBoard
+            $Global:Score[0] ++
+            Write-Host $Global:Score
+        }
+
+        if((GameOver) -eq 1)
+        {
+            drawBoard
+            restoreBoard
+            $Global:Score[2] ++
+            Write-Host $Global:Score
+        }
+        if((GameOver) -eq 99 )
+        { 
+            drawBoard
+            restoreBoard
+            $Global:Score[1] ++
+            Write-Host $Global:Score
+        }
+    }
+    $cc --
+}
